@@ -47,6 +47,13 @@
     <button id="addQuoteBtn">Add Quote</button>
   </div>
 
+    <!-- JSON Import -->
+    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+
+    <!-- JSON Export -->
+    <button id="exportBtn" onclick="exportToJsonFile()">Export Quotes (JSON)</button>
+
+
   <script src="script.js"></script>
   <script>
     // Attach event listeners via JS instead of inline attributes

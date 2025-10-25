@@ -202,3 +202,81 @@ newQuoteBtn.addEventListener('click', showRandomQuote);
 
 // Optional: Sync with server every 60s
 setInterval(syncQuotesWithServer, 60000);
+
+// --------------------
+// Save quotes helper
+// --------------------
+function saveQuotes() {
+  localStorage.setItem('quotes', JSON.stringify(quotes));
+}
+
+// --------------------
+// Export Quotes to JSON
+// --------------------
+function exportToJsonFile() {
+  const jsonData = JSON.stringify(quotes, null, 2);
+  const blob = new Blob([jsonData], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "quotes.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+  notify("Quotes exported successfully!");
+}
+
+// --------------------
+// Import Quotes from JSON File
+// --------------------
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function(event) {
+    try {
+      const importedQuotes = JSON.parse(event.target.result);
+      if (!Array.isArray(importedQuotes)) {
+        alert("Invalid JSON format. Expected an array of quotes.");
+        return;
+      }
+      quotes.push(...importedQuotes);
+      saveQuotes();
+      populateCategories();
+      notify("Quotes imported successfully!");
+    } catch (error) {
+      alert("Error reading JSON file.");
+    }
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
+// --------------------
+// Session Storage Example: Remember last viewed quote
+// --------------------
+function showRandomQuote() {
+  const selectedCategory = categoryFilter?.value || 'all';
+  let filteredQuotes = quotes;
+
+  if (selectedCategory !== 'all') {
+    filteredQuotes = quotes.filter(q => q.category === selectedCategory);
+  }
+
+  if (filteredQuotes.length === 0) {
+    quoteDisplay.textContent = "No quotes available in this category.";
+    return;
+  }
+
+  const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+  const randomQuote = filteredQuotes[randomIndex];
+
+  quoteDisplay.textContent = randomQuote.text;
+  sessionStorage.setItem('lastQuote', randomQuote.text);
+}
+
+// Restore last viewed quote (if any)
+window.addEventListener('load', () => {
+  const lastQuote = sessionStorage.getItem('lastQuote');
+  if (lastQuote) {
+    quoteDisplay.textContent = lastQuote;
+  }
+});
